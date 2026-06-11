@@ -246,6 +246,7 @@ function attachListHandlers() {
 
 export function registerEventHandlers() {
   const searchForm = document.getElementById("park-search-form");
+  const clearFiltersButton = document.getElementById("clear-filters-button");
   const searchStatus = document.getElementById("search-status");
   const resultsNode = document.getElementById("park-results");
   const detailsNode = document.getElementById("park-details-panel");
@@ -258,6 +259,25 @@ export function registerEventHandlers() {
   let activeDetailsRequestId = 0;
   let allParks = [];
   let parksLoaded = false;
+
+  function renderDefaultDetailsState() {
+    detailsNode.innerHTML = "<p>Choose a park to see details, weather, and alerts.</p>";
+  }
+
+  function clearSelectedParkDetails() {
+    // Invalidate any in-flight detail/weather/alerts request chain.
+    activeDetailsRequestId += 1;
+    renderDefaultDetailsState();
+  }
+
+  function attachClearSelectionHandler() {
+    const clearSelectionButton = detailsNode.querySelector("#clear-selection-button");
+    if (!clearSelectionButton) return;
+
+    clearSelectionButton.addEventListener("click", () => {
+      clearSelectedParkDetails();
+    });
+  }
 
   function renderResultsAndAttachHandlers(parks) {
     resultsNode.innerHTML = renderParkResults(parks);
@@ -350,10 +370,20 @@ export function registerEventHandlers() {
       }
 
       detailsNode.innerHTML = `
+        <div class="details-toolbar">
+          <button
+            type="button"
+            id="clear-selection-button"
+            class="details-close-button"
+            aria-label="Clear selected park"
+            title="Clear selection"
+          >X</button>
+        </div>
         ${renderParkDetail(park)}
         ${renderWeatherPanel(null, { loading: true, sectionId: "weather-panel" })}
         ${renderAlertsPanel([], { loading: true, sectionId: "alerts-panel" })}
       `;
+      attachClearSelectionHandler();
 
       getWeatherForecast({
         latitude: park.latitude,
@@ -451,6 +481,33 @@ export function registerEventHandlers() {
     searchStatus.textContent = filteredParks.length
       ? `Showing ${filteredParks.length} park${filteredParks.length === 1 ? "" : "s"}.`
       : "No parks match those filters. Try adjusting name, state, or activity.";
+  });
+
+  if (clearFiltersButton) {
+    clearFiltersButton.addEventListener("click", () => {
+      searchForm.reset();
+
+      if (!parksLoaded) {
+        searchStatus.textContent = "Parks are still loading. Filters will be available once loading finishes.";
+        return;
+      }
+
+      renderResultsAndAttachHandlers(allParks);
+      searchStatus.textContent = `Showing all ${allParks.length} park${allParks.length === 1 ? "" : "s"}.`;
+    });
+  }
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") {
+      return;
+    }
+
+    const clearSelectionButton = detailsNode.querySelector("#clear-selection-button");
+    if (!clearSelectionButton) {
+      return;
+    }
+
+    clearSelectedParkDetails();
   });
 
   attachFormHandlers();
