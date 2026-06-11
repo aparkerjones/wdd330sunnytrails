@@ -398,6 +398,13 @@ button:active {
     min-height: var(--two-park-cards-min-height);
   }
 
+  #park-results {
+    max-height: max(
+      var(--two-park-cards-min-height),
+      var(--details-panel-height, var(--two-park-cards-min-height))
+    );
+  }
+
   #itinerary {
     grid-column: 1 / -1;
   }

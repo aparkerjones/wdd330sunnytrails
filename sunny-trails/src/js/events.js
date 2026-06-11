@@ -260,8 +260,25 @@ export function registerEventHandlers() {
   let allParks = [];
   let parksLoaded = false;
 
+  function syncResultsMaxHeightToDetails() {
+    const detailsHeight = Math.ceil(detailsNode.getBoundingClientRect().height);
+    if (detailsHeight > 0) {
+      document.documentElement.style.setProperty("--details-panel-height", `${detailsHeight}px`);
+    }
+  }
+
+  if (typeof ResizeObserver === "function") {
+    const detailsResizeObserver = new ResizeObserver(() => {
+      syncResultsMaxHeightToDetails();
+    });
+    detailsResizeObserver.observe(detailsNode);
+  }
+
+  window.addEventListener("resize", syncResultsMaxHeightToDetails);
+
   function renderDefaultDetailsState() {
     detailsNode.innerHTML = "<p>Select a park to view details, weather, and alerts.</p>";
+    syncResultsMaxHeightToDetails();
   }
 
   function clearSelectedParkDetails() {
@@ -451,6 +468,7 @@ export function registerEventHandlers() {
         });
     } catch (error) {
       detailsNode.innerHTML = `<p>We could not load that park right now. ${error.message}</p>`;
+      syncResultsMaxHeightToDetails();
     }
   }
 
@@ -512,5 +530,6 @@ export function registerEventHandlers() {
 
   attachFormHandlers();
   attachListHandlers();
+  syncResultsMaxHeightToDetails();
   preloadAllParks();
 }
