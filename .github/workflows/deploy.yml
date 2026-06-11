@@ -25,6 +25,17 @@ jobs:
         run: npm ci
         working-directory: ./sunny-trails
       
+      - name: Check secret presence
+        run: |
+          if [ -z "$VITE_NPS_API_KEY" ]; then
+            echo "ERROR: VITE_NPS_API_KEY is empty or not set"
+            exit 1
+          else
+            echo "VITE_NPS_API_KEY is present (length: ${#VITE_NPS_API_KEY})"
+          fi
+        env:
+          VITE_NPS_API_KEY: ${{ secrets.VITE_NPS_API_KEY }}
+
       - name: Build
         run: npm run build
         working-directory: ./sunny-trails
