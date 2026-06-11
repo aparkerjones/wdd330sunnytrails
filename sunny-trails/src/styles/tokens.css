@@ -1,0 +1,21 @@
+:root {
+  --color-pine-900: #1d3a2f;
+  --color-pine-700: #2f5a47;
+  --color-moss-500: #5f8f58;
+  --color-sand-100: #f3efe3;
+  --color-stone-50: #f8f7f3;
+  --color-sky-500: #2f7ea8;
+  --color-alert-600: #b1442f;
+
+  --font-heading: "Trebuchet MS", "Segoe UI", sans-serif;
+  --font-body: "Verdana", "Segoe UI", sans-serif;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+
+  --radius-card: 12px;
+  --shadow-card: 0 6px 18px rgba(29, 58, 47, 0.12);
+}
