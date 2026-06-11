@@ -1,6 +1,8 @@
 import { apiConfig } from "../config/api-config.js";
 
 const WEATHER_TIMEOUT_MS = 60000;
+const WEATHER_MAX_RETRIES = 2;
+const WEATHER_RETRY_DELAYS_MS = [500, 1200];
 
 function buildWeatherUrl(params = {}) {
   const url = new URL(`${apiConfig.meteoBaseUrl}/forecast`);
@@ -25,29 +27,71 @@ function buildWeatherUrl(params = {}) {
 }
 
 async function requestJson(params) {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), WEATHER_TIMEOUT_MS);
+  for (let attempt = 0; attempt <= WEATHER_MAX_RETRIES; attempt += 1) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), WEATHER_TIMEOUT_MS);
 
-  let response;
-  try {
-    response = await fetch(buildWeatherUrl(params), {
-      signal: controller.signal,
-    });
-  } catch (error) {
-    if (error.name === "AbortError") {
-      throw new Error(`Open-Meteo request timed out after ${WEATHER_TIMEOUT_MS}ms`);
+    let response;
+    try {
+      response = await fetch(buildWeatherUrl(params), {
+        signal: controller.signal,
+      });
+    } catch (error) {
+      clearTimeout(timeoutId);
+
+      const normalizedError =
+        error?.name === "AbortError"
+          ? new Error(`Open-Meteo request timed out after ${WEATHER_TIMEOUT_MS}ms`)
+          : error;
+
+      const canRetry =
+        attempt < WEATHER_MAX_RETRIES && isTransientNetworkError(normalizedError);
+
+      if (canRetry) {
+        const delay = WEATHER_RETRY_DELAYS_MS[attempt] ?? WEATHER_RETRY_DELAYS_MS.at(-1) ?? 800;
+        await wait(delay);
+        continue;
+      }
+
+      throw normalizedError;
     }
 
-    throw error;
-  } finally {
     clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const statusError = new Error(`Open-Meteo request failed (${response.status})`);
+      const canRetry = attempt < WEATHER_MAX_RETRIES && response.status >= 500;
+
+      if (canRetry) {
+        const delay = WEATHER_RETRY_DELAYS_MS[attempt] ?? WEATHER_RETRY_DELAYS_MS.at(-1) ?? 800;
+        await wait(delay);
+        continue;
+      }
+
+      throw statusError;
+    }
+
+    return response.json();
   }
 
-  if (!response.ok) {
-    throw new Error(`Open-Meteo request failed (${response.status})`);
-  }
+  throw new Error("Open-Meteo request failed after retries.");
+}
 
-  return response.json();
+function wait(milliseconds) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, milliseconds);
+  });
+}
+
+function isTransientNetworkError(error) {
+  const message = String(error?.message || "").toLowerCase();
+  return (
+    message.includes("network") ||
+    message.includes("connection closed") ||
+    message.includes("failed to fetch") ||
+    message.includes("load failed") ||
+    message.includes("timed out")
+  );
 }
 
 function toFiniteNumber(value) {
