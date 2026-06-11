@@ -60,9 +60,28 @@ function getWeatherVisual(code) {
   return { icon: "&#127781;", label: "Mixed" };
 }
 
-export function renderParkDetails(park = null, weather = null, alerts = []) {
-  if (!park) {
-    return `<p>Choose a park to see details, weather, and alerts.</p>`;
+export function renderWeatherPanel(
+  weather = null,
+  { loading = false, errorMessage = "", sectionId = "" } = {}
+) {
+  const idAttribute = sectionId ? ` id="${sectionId}"` : "";
+
+  if (loading) {
+    return `
+      <section class="detail-group"${idAttribute}>
+        <h3>Weather</h3>
+        <p>Loading weather...</p>
+      </section>
+    `;
+  }
+
+  if (errorMessage) {
+    return `
+      <section class="detail-group"${idAttribute}>
+        <h3>Weather</h3>
+        <p>Weather is temporarily unavailable. ${errorMessage}</p>
+      </section>
+    `;
   }
 
   const forecastItems = Array.isArray(weather?.daily)
@@ -93,9 +112,9 @@ export function renderParkDetails(park = null, weather = null, alerts = []) {
     `
     : "<p>The 7-day forecast is not available right now.</p>";
 
-  const weatherHtml = weather
+  return weather
     ? `
-      <section class="detail-group">
+      <section class="detail-group"${idAttribute}>
         <h3>Weather</h3>
         <p><strong>Current temperature:</strong> ${weather.current.temperature ?? "Not available"}°F</p>
         <p><strong>Wind speed:</strong> ${weather.current.windSpeed ?? "Not available"} mph</p>
@@ -103,19 +122,59 @@ export function renderParkDetails(park = null, weather = null, alerts = []) {
         ${forecastHtml}
       </section>
     `
-    : `<p>Weather info is not available right now.</p>`;
+    : `
+      <section class="detail-group"${idAttribute}>
+        <h3>Weather</h3>
+        <p>Weather info is not available right now.</p>
+      </section>
+    `;
+}
+
+export function renderAlertsPanel(
+  alerts = [],
+  { loading = false, errorMessage = "", sectionId = "" } = {}
+) {
+  const idAttribute = sectionId ? ` id="${sectionId}"` : "";
+
+  if (loading) {
+    return `
+      <section class="detail-group"${idAttribute}>
+        <h3>Alerts</h3>
+        <p>Loading alerts...</p>
+      </section>
+    `;
+  }
+
+  if (errorMessage) {
+    return `
+      <section class="detail-group"${idAttribute}>
+        <h3>Alerts</h3>
+        <p>Alerts are temporarily unavailable. ${errorMessage}</p>
+      </section>
+    `;
+  }
 
   const alertsHtml = alerts.length
     ? `<ul class="alert-list">${alerts.map((alert) => `<li><strong>${alert.title}</strong>${alert.description ? ` - ${alert.description}` : ""}</li>`).join("")}</ul>`
     : `<p>No active alerts were reported for this park.</p>`;
 
   return `
-    ${renderParkDetail(park)}
-    ${weatherHtml}
-    <section class="detail-group">
+    <section class="detail-group"${idAttribute}>
       <h3>Alerts</h3>
       ${alertsHtml}
     </section>
+  `;
+}
+
+export function renderParkDetails(park = null, weather = null, alerts = []) {
+  if (!park) {
+    return `<p>Choose a park to see details, weather, and alerts.</p>`;
+  }
+
+  return `
+    ${renderParkDetail(park)}
+    ${renderWeatherPanel(weather)}
+    ${renderAlertsPanel(alerts)}
   `;
 }
 

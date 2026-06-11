@@ -1,6 +1,6 @@
 import { apiConfig } from "../config/api-config.js";
 
-const WEATHER_TIMEOUT_MS = 7000;
+const WEATHER_TIMEOUT_MS = 60000;
 
 function buildWeatherUrl(params = {}) {
   const url = new URL(`${apiConfig.meteoBaseUrl}/forecast`);

@@ -1,6 +1,7 @@
 import { getParkAlerts, getParkByCode, searchParks } from "./park-service.js";
 import { getWeatherForecast } from "./weather-service.js";
-import { renderParkDetails, renderParkResults } from "./ui.js";
+import { renderParkDetail } from "./park-detail.js";
+import { renderAlertsPanel, renderParkResults, renderWeatherPanel } from "./ui.js";
 import { getAllTrips, saveTrip, deleteTrip } from "./storage.js";
 import { renderItineraryForm } from "./itinerary-form.js";
 import { renderItineraryList } from "./itinerary-list.js";
@@ -236,7 +237,10 @@ export function registerEventHandlers() {
     return;
   }
 
+  let activeDetailsRequestId = 0;
+
   async function showParkDetails(parkCode) {
+    const requestId = ++activeDetailsRequestId;
     const detailsHelper = document.getElementById("details-helper");
     if (detailsHelper) {
       detailsHelper.remove();
@@ -247,22 +251,84 @@ export function registerEventHandlers() {
     try {
       const park = await getParkByCode(parkCode);
 
+      if (requestId !== activeDetailsRequestId) {
+        return;
+      }
+
       if (!park || !park.parkCode) {
         throw new Error("No park details were returned for that selection.");
       }
 
-      const [weatherResult, alertsResult] = await Promise.allSettled([
-        getWeatherForecast({
-          latitude: park.latitude,
-          longitude: park.longitude,
-        }),
-        getParkAlerts(parkCode),
-      ]);
+      detailsNode.innerHTML = `
+        ${renderParkDetail(park)}
+        ${renderWeatherPanel(null, { loading: true, sectionId: "weather-panel" })}
+        ${renderAlertsPanel([], { loading: true, sectionId: "alerts-panel" })}
+      `;
 
-      const weather = weatherResult.status === "fulfilled" ? weatherResult.value : null;
-      const alerts = alertsResult.status === "fulfilled" ? alertsResult.value : [];
+      getWeatherForecast({
+        latitude: park.latitude,
+        longitude: park.longitude,
+      })
+        .then((weather) => {
+          if (requestId !== activeDetailsRequestId) {
+            return;
+          }
 
-      detailsNode.innerHTML = renderParkDetails(park, weather, alerts);
+          const weatherPanel = detailsNode.querySelector("#weather-panel");
+          if (!weatherPanel) {
+            return;
+          }
+
+          weatherPanel.outerHTML = renderWeatherPanel(weather, {
+            sectionId: "weather-panel",
+          });
+        })
+        .catch((error) => {
+          if (requestId !== activeDetailsRequestId) {
+            return;
+          }
+
+          const weatherPanel = detailsNode.querySelector("#weather-panel");
+          if (!weatherPanel) {
+            return;
+          }
+
+          weatherPanel.outerHTML = renderWeatherPanel(null, {
+            errorMessage: error.message,
+            sectionId: "weather-panel",
+          });
+        });
+
+      getParkAlerts(parkCode)
+        .then((alerts) => {
+          if (requestId !== activeDetailsRequestId) {
+            return;
+          }
+
+          const alertsPanel = detailsNode.querySelector("#alerts-panel");
+          if (!alertsPanel) {
+            return;
+          }
+
+          alertsPanel.outerHTML = renderAlertsPanel(alerts, {
+            sectionId: "alerts-panel",
+          });
+        })
+        .catch((error) => {
+          if (requestId !== activeDetailsRequestId) {
+            return;
+          }
+
+          const alertsPanel = detailsNode.querySelector("#alerts-panel");
+          if (!alertsPanel) {
+            return;
+          }
+
+          alertsPanel.outerHTML = renderAlertsPanel([], {
+            errorMessage: error.message,
+            sectionId: "alerts-panel",
+          });
+        });
     } catch (error) {
       detailsNode.innerHTML = `<p>Sorry, we could not load that park right now. ${error.message}</p>`;
     }
