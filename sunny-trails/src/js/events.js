@@ -117,6 +117,25 @@ function normalizeStateInput(inputValue) {
   };
 }
 
+function normalizeSearchText(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function parkNameMatchesQuery(parkName, query) {
+  const normalizedQuery = normalizeSearchText(query);
+  if (!normalizedQuery) return true;
+
+  const normalizedParkName = normalizeSearchText(parkName);
+  if (!normalizedParkName) return false;
+
+  const queryTokens = normalizedQuery.split(" ").filter(Boolean);
+  return queryTokens.every((token) => normalizedParkName.includes(token));
+}
+
 function refreshItineraryDisplay() {
   const itineraryNode = document.getElementById("itinerary");
   if (!itineraryNode) return;
@@ -260,8 +279,19 @@ export function registerEventHandlers() {
     resultsNode.innerHTML = "";
 
     try {
-      const parks = await searchParks({ query, stateCode, limit: 10 });
-      resultsNode.innerHTML = renderParkResults(parks);
+      const apiLimit = query ? 50 : 10;
+      const parks = await searchParks({
+        query,
+        stateCode,
+        sort: query ? "-relevanceScore" : "fullName",
+        limit: apiLimit,
+      });
+
+      const filteredParks = query
+        ? parks.filter((park) => parkNameMatchesQuery(park.name, query))
+        : parks;
+
+      resultsNode.innerHTML = renderParkResults(filteredParks);
 
       const buttons = resultsNode.querySelectorAll("button[data-park-code]");
       buttons.forEach((button) => {
@@ -270,9 +300,9 @@ export function registerEventHandlers() {
         });
       });
 
-      searchStatus.textContent = parks.length
-        ? `Found ${parks.length} park${parks.length === 1 ? "" : "s"}.`
-        : "No parks matched that search. Try another park name or state.";
+      searchStatus.textContent = filteredParks.length
+        ? `Found ${filteredParks.length} park${filteredParks.length === 1 ? "" : "s"}.`
+        : "No parks matched that name. Try another park name or state.";
     } catch (error) {
       searchStatus.textContent = `Search failed: ${error.message}`;
       resultsNode.innerHTML = "";

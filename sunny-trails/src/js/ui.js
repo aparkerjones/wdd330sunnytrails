@@ -142,7 +142,7 @@ export function initializeUi() {
       </label>
       <button type="submit">Search parks</button>
     </form>
-    <p id="search-status" class="status-message">Search by park name, state code, full state name, or any combination.</p>
+    <p id="search-status" class="status-message">Search by park name, plus state code or full state name.</p>
     <div id="park-results"></div>
   `;
 
