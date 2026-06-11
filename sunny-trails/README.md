@@ -1,6 +1,6 @@
-# Sunny Trails Planner (Week 5 Starter)
+# Sunny Trails Planner (Week 5 Setup)
 
-This folder contains Week 5 deliverables for the Sunny Trails final project.
+This folder holds the Week 5 deliverables for the Sunny Trails final project.
 
 ## Week 5 Deliverables
 
@@ -13,6 +13,20 @@ This folder contains Week 5 deliverables for the Sunny Trails final project.
 
 ## Quick Start
 
-1. Copy `.env.example` to `.env` and fill in values.
-2. Open `src/index.html` in your local dev flow.
-3. Build features week-by-week from your Trello board.
+1. Run `npm install`.
+2. Copy `.env.example` to `.env` and fill in values.
+3. Run `npm run start` for development.
+4. Run `npm run build` before publishing.
+
+## Project Modules
+
+- `src/js/parkService.js`
+- `src/js/weatherService.js`
+- `src/js/storage.js`
+- `src/js/ui.js`
+- `src/js/events.js`
+- `src/js/utilities.js`
+- `src/js/parkCard.js`
+- `src/js/parkDetail.js`
+- `src/js/itineraryForm.js`
+- `src/js/itineraryList.js`

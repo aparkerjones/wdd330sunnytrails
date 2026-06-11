@@ -27,7 +27,7 @@
 | location, visitor info    |
 |---------------------------|
 | Weather                   |
-| temp, wind, precip        |
+| temperature, wind, precipitation |
 |---------------------------|
 | Alerts                    |
 | closure/warning items     |
