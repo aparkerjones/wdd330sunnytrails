@@ -35,6 +35,12 @@ function normalizePark(record = {}) {
       }))
     : [];
 
+  const activities = Array.isArray(record.activities)
+    ? record.activities
+        .map((activity) => activity?.name || "")
+        .filter(Boolean)
+    : [];
+
   return {
     parkCode: record.parkCode || "",
     name: record.fullName || record.name || "Unknown park",
@@ -48,6 +54,7 @@ function normalizePark(record = {}) {
     url: record.url || "",
     latitude: record.latitude || "",
     longitude: record.longitude || "",
+    activities,
     images,
   };
 }
