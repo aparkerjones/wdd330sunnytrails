@@ -6,7 +6,7 @@ import { getAllTrips } from "./storage.js";
 
 export function renderParkResults(parks = []) {
   if (!parks.length) {
-    return `<p>No parks to show yet. Try a park name, a state code, or a full state name.</p>`;
+    return `<p>No parks to show. Try adjusting your filters by name, state, or activity.</p>`;
   }
 
   return `<div class="park-results">${parks.map(renderParkCard).join("")}</div>`;
@@ -189,19 +189,26 @@ export function initializeUi() {
 
   searchNode.innerHTML = `
     <h2 class="section-title">Find Your Next Park Adventure</h2>
-    <p class="section-description">Search by park name or state, then open a park profile with one click.</p>
+    <p class="section-description">All parks load automatically. Use filters by park name, state, or activity.</p>
     <form id="park-search-form" class="search-form">
       <label>
-        <span>Park name</span>
+        <span>Park name filter</span>
         <input name="query" type="search" placeholder="Yellowstone" />
       </label>
       <label>
-        <span>State (code or name)</span>
+        <span>State filter (code or name)</span>
         <input name="stateCode" type="text" placeholder="WY, Utah, New York" />
       </label>
-      <button type="submit">Search parks</button>
+      <label>
+        <span>Activity filter</span>
+        <input name="activity" type="search" placeholder="Hiking" />
+      </label>
+      <div class="search-actions">
+        <button type="submit">Apply filters</button>
+        <button type="button" id="clear-filters-button" class="secondary-button">Clear filters</button>
+      </div>
     </form>
-    <p id="search-status" class="status-message">Search by park name, plus state code or full state name.</p>
+    <p id="search-status" class="status-message">Loading all parks...</p>
     <div id="park-results"></div>
   `;
 

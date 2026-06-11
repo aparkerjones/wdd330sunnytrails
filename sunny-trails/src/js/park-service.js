@@ -95,12 +95,13 @@ export function getParkServiceConfig() {
   };
 }
 
-export async function searchParks({ query = "", stateCode = "", sort = "", limit = 10 } = {}) {
+export async function searchParks({ query = "", stateCode = "", sort = "", limit = 50, start = 0 } = {}) {
   const data = await requestJson("/parks", {
     q: query,
     stateCode,
     sort,
     limit,
+    start,
   });
 
   return (data.data || []).map(normalizePark);

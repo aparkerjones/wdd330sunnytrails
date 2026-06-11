@@ -137,6 +137,24 @@ function parkNameMatchesQuery(parkName, query) {
   return queryTokens.every((token) => normalizedParkName.includes(token));
 }
 
+function activityMatchesQuery(activities, query) {
+  const normalizedQuery = normalizeSearchText(query);
+  if (!normalizedQuery) return true;
+
+  const activityNames = Array.isArray(activities)
+    ? activities.map((activity) => normalizeSearchText(activity)).filter(Boolean)
+    : [];
+
+  if (!activityNames.length) {
+    return false;
+  }
+
+  const queryTokens = normalizedQuery.split(" ").filter(Boolean);
+  return queryTokens.every((token) =>
+    activityNames.some((activityName) => activityName.includes(token))
+  );
+}
+
 function refreshItineraryDisplay() {
   const itineraryNode = document.getElementById("itinerary");
   if (!itineraryNode) return;
@@ -238,6 +256,78 @@ export function registerEventHandlers() {
   }
 
   let activeDetailsRequestId = 0;
+  let allParks = [];
+  let parksLoaded = false;
+
+  function renderResultsAndAttachHandlers(parks) {
+    resultsNode.innerHTML = renderParkResults(parks);
+
+    const buttons = resultsNode.querySelectorAll("button[data-park-code]");
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        showParkDetails(button.dataset.parkCode);
+      });
+    });
+  }
+
+  function applyLocalFilters({ query = "", stateCode = "", activityQuery = "" } = {}) {
+    return allParks.filter((park) => {
+      const matchesName = parkNameMatchesQuery(park.name, query);
+      const matchesActivity = activityMatchesQuery(park.activities, activityQuery);
+
+      let matchesState = true;
+      if (stateCode) {
+        const parkStates = String(park.states || "")
+          .split(",")
+          .map((value) => value.trim().toUpperCase())
+          .filter(Boolean);
+
+        const requestedStates = stateCode
+          .split(",")
+          .map((value) => value.trim().toUpperCase())
+          .filter(Boolean);
+
+        matchesState = requestedStates.every((state) => parkStates.includes(state));
+      }
+
+      return matchesName && matchesState && matchesActivity;
+    });
+  }
+
+  async function preloadAllParks() {
+    parksLoaded = false;
+    searchStatus.textContent = "Loading all parks...";
+
+    try {
+      const pageSize = 50;
+      const maxPages = 40;
+      const parks = [];
+
+      for (let pageIndex = 0; pageIndex < maxPages; pageIndex += 1) {
+        const start = pageIndex * pageSize;
+        const page = await searchParks({
+          sort: "fullName",
+          limit: pageSize,
+          start,
+        });
+
+        parks.push(...page);
+        renderResultsAndAttachHandlers(parks);
+        searchStatus.textContent = `Loaded ${parks.length} park${parks.length === 1 ? "" : "s"}...`;
+
+        if (page.length < pageSize) {
+          break;
+        }
+      }
+
+      allParks = parks;
+      parksLoaded = true;
+      searchStatus.textContent = `Loaded ${allParks.length} parks. Use filters by name, state, or activity.`;
+    } catch (error) {
+      searchStatus.textContent = `Loading parks failed: ${error.message}`;
+      resultsNode.innerHTML = "";
+    }
+  }
 
   async function showParkDetails(parkCode) {
     const requestId = ++activeDetailsRequestId;
@@ -340,6 +430,7 @@ export function registerEventHandlers() {
     const formData = new FormData(searchForm);
     const query = String(formData.get("query") || "").trim();
     const rawStateInput = String(formData.get("stateCode") || "").trim();
+    const activityQuery = String(formData.get("activity") || "").trim();
     const { stateCode, invalid } = normalizeStateInput(rawStateInput);
 
     if (invalid.length) {
@@ -349,40 +440,20 @@ export function registerEventHandlers() {
       return;
     }
 
-    searchStatus.textContent = "Searching parks...";
-    resultsNode.innerHTML = "";
-
-    try {
-      const apiLimit = query ? 50 : 10;
-      const parks = await searchParks({
-        query,
-        stateCode,
-        sort: query ? "-relevanceScore" : "fullName",
-        limit: apiLimit,
-      });
-
-      const filteredParks = query
-        ? parks.filter((park) => parkNameMatchesQuery(park.name, query))
-        : parks;
-
-      resultsNode.innerHTML = renderParkResults(filteredParks);
-
-      const buttons = resultsNode.querySelectorAll("button[data-park-code]");
-      buttons.forEach((button) => {
-        button.addEventListener("click", () => {
-          showParkDetails(button.dataset.parkCode);
-        });
-      });
-
-      searchStatus.textContent = filteredParks.length
-        ? `Found ${filteredParks.length} park${filteredParks.length === 1 ? "" : "s"}.`
-        : "No parks matched that name. Try another park name or state.";
-    } catch (error) {
-      searchStatus.textContent = `Search failed: ${error.message}`;
-      resultsNode.innerHTML = "";
+    if (!parksLoaded) {
+      searchStatus.textContent = "Parks are still loading. Please try again in a moment.";
+      return;
     }
+
+    const filteredParks = applyLocalFilters({ query, stateCode, activityQuery });
+    renderResultsAndAttachHandlers(filteredParks);
+
+    searchStatus.textContent = filteredParks.length
+      ? `Showing ${filteredParks.length} park${filteredParks.length === 1 ? "" : "s"}.`
+      : "No parks match those filters. Try adjusting name, state, or activity.";
   });
 
   attachFormHandlers();
   attachListHandlers();
+  preloadAllParks();
 }
