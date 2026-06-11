@@ -1,5 +1,7 @@
 import { apiConfig } from "../config/api-config.js";
 
+const WEATHER_TIMEOUT_MS = 7000;
+
 function buildWeatherUrl(params = {}) {
   const url = new URL(`${apiConfig.meteoBaseUrl}/forecast`);
 
@@ -23,7 +25,23 @@ function buildWeatherUrl(params = {}) {
 }
 
 async function requestJson(params) {
-  const response = await fetch(buildWeatherUrl(params));
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), WEATHER_TIMEOUT_MS);
+
+  let response;
+  try {
+    response = await fetch(buildWeatherUrl(params), {
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw new Error(`Open-Meteo request timed out after ${WEATHER_TIMEOUT_MS}ms`);
+    }
+
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 
   if (!response.ok) {
     throw new Error(`Open-Meteo request failed (${response.status})`);
@@ -85,10 +103,13 @@ export async function getWeatherForecast({ latitude, longitude } = {}) {
 
     return normalizeWeather(data);
   } catch (error) {
+    const shouldRetryWithDefaults =
+      error.message.includes("(400)") || error.message.toLowerCase().includes("latitude") || error.message.toLowerCase().includes("longitude");
+
     const usingDefaultCoords =
       safeLatitude === apiConfig.defaultLat && safeLongitude === apiConfig.defaultLon;
 
-    if (usingDefaultCoords) {
+    if (usingDefaultCoords || !shouldRetryWithDefaults) {
       throw error;
     }
 
