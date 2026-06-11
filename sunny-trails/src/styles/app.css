@@ -222,6 +222,52 @@ button:active {
   font-family: var(--font-heading);
 }
 
+.detail-group h4 {
+  margin: 0.75rem 0 0.5rem;
+  font-size: 1rem;
+  color: #264639;
+}
+
+.forecast-grid {
+  display: grid;
+  gap: 0.55rem;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.forecast-item {
+  border: 1px solid rgba(47, 90, 71, 0.15);
+  border-radius: 10px;
+  background: #f7faf6;
+  padding: 0.55rem 0.6rem;
+}
+
+.forecast-item p {
+  margin: 0.2rem 0;
+  font-size: 0.88rem;
+  color: #355743;
+}
+
+.forecast-condition {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 600;
+}
+
+.forecast-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 1.25rem;
+  min-width: 1.25rem;
+  font-size: 1.05rem;
+}
+
+.forecast-date {
+  margin: 0;
+  font-weight: 600;
+  color: #1d3a2f;
+}
+
 .alert-list {
   margin: 0;
   padding-left: 1rem;

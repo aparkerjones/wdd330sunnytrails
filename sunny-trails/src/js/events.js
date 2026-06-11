@@ -106,6 +106,11 @@ export function registerEventHandlers() {
   }
 
   async function showParkDetails(parkCode) {
+    const detailsHelper = document.getElementById("details-helper");
+    if (detailsHelper) {
+      detailsHelper.remove();
+    }
+
     detailsNode.innerHTML = "<p>Loading park details...</p>";
 
     try {

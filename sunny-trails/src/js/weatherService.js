@@ -7,7 +7,7 @@ function buildWeatherUrl(params = {}) {
     latitude: apiConfig.defaultLat,
     longitude: apiConfig.defaultLon,
     current_weather: true,
-    daily: "temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max",
+    daily: "weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max",
     temperature_unit: "fahrenheit",
     wind_speed_unit: "mph",
     precipitation_unit: "inch",
@@ -50,6 +50,7 @@ function normalizeWeather(data = {}) {
     daily: Array.isArray(daily.time)
       ? daily.time.map((time, index) => ({
           date: time,
+          weatherCode: daily.weather_code?.[index] ?? daily.weathercode?.[index] ?? null,
           maxTemperature: daily.temperature_2m_max?.[index] ?? null,
           minTemperature: daily.temperature_2m_min?.[index] ?? null,
           precipitationProbability: daily.precipitation_probability_max?.[index] ?? null,
