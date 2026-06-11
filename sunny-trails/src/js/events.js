@@ -261,7 +261,7 @@ export function registerEventHandlers() {
   let parksLoaded = false;
 
   function renderDefaultDetailsState() {
-    detailsNode.innerHTML = "<p>Choose a park to see details, weather, and alerts.</p>";
+    detailsNode.innerHTML = "<p>Select a park to view details, weather, and alerts.</p>";
   }
 
   function clearSelectedParkDetails() {
@@ -316,7 +316,7 @@ export function registerEventHandlers() {
 
   async function preloadAllParks() {
     parksLoaded = false;
-    searchStatus.textContent = "Loading all parks...";
+    searchStatus.textContent = "Loading parks...";
 
     try {
       const pageSize = 50;
@@ -333,7 +333,7 @@ export function registerEventHandlers() {
 
         parks.push(...page);
         renderResultsAndAttachHandlers(parks);
-        searchStatus.textContent = `Loaded ${parks.length} park${parks.length === 1 ? "" : "s"}...`;
+        searchStatus.textContent = `Loaded ${parks.length} park${parks.length === 1 ? "" : "s"} so far...`;
 
         if (page.length < pageSize) {
           break;
@@ -342,9 +342,9 @@ export function registerEventHandlers() {
 
       allParks = parks;
       parksLoaded = true;
-      searchStatus.textContent = `Loaded ${allParks.length} parks. Use filters by name, state, or activity.`;
+      searchStatus.textContent = `${allParks.length} parks loaded. Use the filters to narrow results.`;
     } catch (error) {
-      searchStatus.textContent = `Loading parks failed: ${error.message}`;
+      searchStatus.textContent = `Could not load parks: ${error.message}`;
       resultsNode.innerHTML = "";
     }
   }
@@ -450,7 +450,7 @@ export function registerEventHandlers() {
           });
         });
     } catch (error) {
-      detailsNode.innerHTML = `<p>Sorry, we could not load that park right now. ${error.message}</p>`;
+      detailsNode.innerHTML = `<p>We could not load that park right now. ${error.message}</p>`;
     }
   }
 
@@ -465,13 +465,13 @@ export function registerEventHandlers() {
 
     if (invalid.length) {
       const badValues = invalid.join(", ");
-      searchStatus.textContent = `I could not match these states: ${badValues}. Try a two-letter code (WY) or full name (Wyoming).`;
+      searchStatus.textContent = `These state entries were not recognized: ${badValues}. Try a two-letter code (WY) or full name (Wyoming).`;
       resultsNode.innerHTML = "";
       return;
     }
 
     if (!parksLoaded) {
-      searchStatus.textContent = "Parks are still loading. Please try again in a moment.";
+      searchStatus.textContent = "Parks are still loading. Try again in a moment.";
       return;
     }
 
@@ -480,7 +480,7 @@ export function registerEventHandlers() {
 
     searchStatus.textContent = filteredParks.length
       ? `Showing ${filteredParks.length} park${filteredParks.length === 1 ? "" : "s"}.`
-      : "No parks match those filters. Try adjusting name, state, or activity.";
+      : "No parks match those filters. Try changing name, state, or activity.";
   });
 
   if (clearFiltersButton) {
@@ -488,7 +488,7 @@ export function registerEventHandlers() {
       searchForm.reset();
 
       if (!parksLoaded) {
-        searchStatus.textContent = "Parks are still loading. Filters will be available once loading finishes.";
+        searchStatus.textContent = "Parks are still loading. Filters will be ready once loading finishes.";
         return;
       }
 

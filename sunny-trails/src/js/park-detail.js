@@ -6,7 +6,7 @@ export function renderParkDetail(park = {}) {
   return `
     <section class="park-detail">
       <h2>${park.name || "Park Details"}</h2>
-      <p>${park.description || "Park details will show up here once a park is selected."}</p>
+      <p>${park.description || "Park details will appear here once you select a park."}</p>
       <p><strong>States:</strong> ${park.states || "Not listed"}</p>
       <p><strong>Designation:</strong> ${park.designation || "Not listed"}</p>
       <p><strong>Activities:</strong> ${activitiesText}</p>

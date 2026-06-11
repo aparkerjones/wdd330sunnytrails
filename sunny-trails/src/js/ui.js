@@ -6,7 +6,7 @@ import { getAllTrips } from "./storage.js";
 
 export function renderParkResults(parks = []) {
   if (!parks.length) {
-    return `<p>No parks to show. Try adjusting your filters by name, state, or activity.</p>`;
+    return `<p>No parks match your current filters. Try a different name, state, or activity.</p>`;
   }
 
   return `<div class="park-results">${parks.map(renderParkCard).join("")}</div>`;
@@ -70,7 +70,7 @@ export function renderWeatherPanel(
     return `
       <section class="detail-group"${idAttribute}>
         <h3>Weather</h3>
-        <p>Loading weather...</p>
+        <p>Loading weather data...</p>
       </section>
     `;
   }
@@ -79,7 +79,7 @@ export function renderWeatherPanel(
     return `
       <section class="detail-group"${idAttribute}>
         <h3>Weather</h3>
-        <p>Weather is temporarily unavailable. ${errorMessage}</p>
+        <p>Weather is unavailable right now. ${errorMessage}</p>
       </section>
     `;
   }
@@ -110,7 +110,7 @@ export function renderWeatherPanel(
           .join("")}
       </div>
     `
-    : "<p>The 7-day forecast is not available right now.</p>";
+    : "<p>The 7-day forecast is unavailable right now.</p>";
 
   return weather
     ? `
@@ -125,7 +125,7 @@ export function renderWeatherPanel(
     : `
       <section class="detail-group"${idAttribute}>
         <h3>Weather</h3>
-        <p>Weather info is not available right now.</p>
+        <p>Weather data is unavailable right now.</p>
       </section>
     `;
 }
@@ -149,14 +149,14 @@ export function renderAlertsPanel(
     return `
       <section class="detail-group"${idAttribute}>
         <h3>Alerts</h3>
-        <p>Alerts are temporarily unavailable. ${errorMessage}</p>
+        <p>Alerts are unavailable right now. ${errorMessage}</p>
       </section>
     `;
   }
 
   const alertsHtml = alerts.length
     ? `<ul class="alert-list">${alerts.map((alert) => `<li><strong>${alert.title}</strong>${alert.description ? ` - ${alert.description}` : ""}</li>`).join("")}</ul>`
-    : `<p>No active alerts were reported for this park.</p>`;
+    : `<p>No active alerts reported for this park.</p>`;
 
   return `
     <section class="detail-group"${idAttribute}>
@@ -168,7 +168,7 @@ export function renderAlertsPanel(
 
 export function renderParkDetails(park = null, weather = null, alerts = []) {
   if (!park) {
-    return `<p>Choose a park to see details, weather, and alerts.</p>`;
+    return `<p>Select a park to view details, weather, and alerts.</p>`;
   }
 
   return `
@@ -189,7 +189,7 @@ export function initializeUi() {
 
   searchNode.innerHTML = `
     <h2 class="section-title">Find Your Next Park Adventure</h2>
-    <p class="section-description">All parks load automatically. Use filters by park name, state, or activity.</p>
+    <p class="section-description">Parks load automatically. Narrow the list by name, state, or activity.</p>
     <form id="park-search-form" class="search-form">
       <label>
         <span>Park name filter</span>
@@ -208,15 +208,15 @@ export function initializeUi() {
         <button type="button" id="clear-filters-button" class="secondary-button">Clear filters</button>
       </div>
     </form>
-    <p id="search-status" class="status-message">Loading all parks...</p>
+    <p id="search-status" class="status-message">Loading parks...</p>
     <div id="park-results"></div>
   `;
 
   detailsNode.innerHTML = `
     <h2 class="section-title">Park Details</h2>
-    <p id="details-helper" class="section-description">Weather and current alerts will appear after you choose a park.</p>
+    <p id="details-helper" class="section-description">Choose a park to load its weather and active alerts.</p>
     <div id="park-details-panel">
-      <p>Choose a park to see details, weather, and alerts.</p>
+      <p>Select a park to view details, weather, and alerts.</p>
     </div>
   `;
 
