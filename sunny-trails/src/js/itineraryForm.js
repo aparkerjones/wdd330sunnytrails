@@ -1,10 +1,12 @@
+import { escapeHtml } from "./utilities.js";
+
 export function renderItineraryForm(trip = null) {
-  const id = trip?.id || "";
-  const name = trip?.name || "";
-  const parkCode = trip?.parkCode || "";
-  const startDate = trip?.startDate || "";
-  const endDate = trip?.endDate || "";
-  const notes = trip?.notes || "";
+  const id = escapeHtml(trip?.id || "");
+  const name = escapeHtml(trip?.name || "");
+  const parkCode = escapeHtml(trip?.parkCode || "");
+  const startDate = escapeHtml(trip?.startDate || "");
+  const endDate = escapeHtml(trip?.endDate || "");
+  const notes = escapeHtml(trip?.notes || "");
 
   return `
     <form id="itinerary-form" class="itinerary-form">

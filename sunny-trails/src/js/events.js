@@ -15,6 +15,7 @@ function refreshItineraryDisplay() {
 
   if (formNode) {
     formNode.outerHTML = renderItineraryForm();
+    attachFormHandlers();
   }
 
   if (listNode) {
