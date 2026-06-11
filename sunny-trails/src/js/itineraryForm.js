@@ -16,33 +16,35 @@ export function renderItineraryForm(trip = null) {
         <legend>Trip Details</legend>
         
         <label>
-          Trip name *
+          <span>Trip name *</span>
           <input name="tripName" type="text" value="${name}" required />
         </label>
         
         <label>
-          Park code
+          <span>Park code</span>
           <input name="parkCode" type="text" value="${parkCode}" placeholder="e.g., yell" />
         </label>
         
         <label>
-          Start date
+          <span>Start date</span>
           <input name="startDate" type="date" value="${startDate}" />
         </label>
         
         <label>
-          End date
+          <span>End date</span>
           <input name="endDate" type="date" value="${endDate}" />
         </label>
         
         <label>
-          Trip notes
+          <span>Trip notes</span>
           <textarea name="notes" placeholder="What to bring, activities planned, etc.">${notes}</textarea>
         </label>
       </fieldset>
-      
-      <button type="submit">${trip ? "Update trip" : "Save new trip"}</button>
-      ${trip ? `<button type="button" id="cancel-edit">Cancel</button>` : ""}
+
+      <div class="form-actions">
+        <button type="submit">${trip ? "Update trip" : "Save new trip"}</button>
+        ${trip ? `<button type="button" id="cancel-edit">Cancel</button>` : ""}
+      </div>
     </form>
   `;
 }

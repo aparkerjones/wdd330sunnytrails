@@ -5,35 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sunny Trails Planner</title>
     <link rel="stylesheet" href="./styles/tokens.css" />
-    <style>
-      body {
-        margin: 0;
-        font-family: var(--font-body);
-        background: linear-gradient(180deg, var(--color-stone-50), var(--color-sand-100));
-        color: var(--color-pine-900);
-      }
-      header {
-        padding: var(--space-6);
-        background: var(--color-pine-900);
-        color: #fff;
-      }
-      main {
-        padding: var(--space-6);
-        display: grid;
-        gap: var(--space-4);
-      }
-      .card {
-        background: #fff;
-        border-radius: var(--radius-card);
-        box-shadow: var(--shadow-card);
-        padding: var(--space-4);
-      }
-    </style>
+    <link rel="stylesheet" href="./styles/app.css" />
   </head>
   <body>
-    <header>
-      <h1>Sunny Trails Planner</h1>
-      <p>National park planning in one place.</p>
+    <header class="site-header">
+      <div class="hero-content">
+        <p class="eyebrow">National Parks Trip Planner</p>
+        <h1>Sunny Trails Planner</h1>
+        <p class="tagline">Discover parks, check weather, and keep your trip plans in one clean place.</p>
+      </div>
     </header>
     <main>
       <section class="card" id="search">Search tools and park results will show up here.</section>
