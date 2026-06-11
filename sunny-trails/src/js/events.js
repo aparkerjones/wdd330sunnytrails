@@ -6,6 +6,6 @@ export function registerEventHandlers() {
 
   itinerarySection.addEventListener("submit", (event) => {
     event.preventDefault();
-    alert("Trip saving comes next in Week 6.");
+    alert("Trip saving is still coming in Week 6.");
   });
 }
