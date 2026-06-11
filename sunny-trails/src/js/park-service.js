@@ -26,6 +26,21 @@ async function requestJson(path, params) {
   return response.json();
 }
 
+function parseLatLong(value = "") {
+  const text = String(value || "");
+  if (!text.trim()) {
+    return { latitude: "", longitude: "" };
+  }
+
+  const latMatch = text.match(/lat\s*:?\s*(-?\d+(?:\.\d+)?)/i);
+  const lonMatch = text.match(/(?:long|lng|lon)\s*:?\s*(-?\d+(?:\.\d+)?)/i);
+
+  return {
+    latitude: latMatch?.[1] || "",
+    longitude: lonMatch?.[1] || "",
+  };
+}
+
 function normalizePark(record = {}) {
   const images = Array.isArray(record.images)
     ? record.images.map((image) => ({
@@ -41,6 +56,10 @@ function normalizePark(record = {}) {
         .filter(Boolean)
     : [];
 
+  const latLongFallback = parseLatLong(record.latLong);
+  const latitude = record.latitude || latLongFallback.latitude || "";
+  const longitude = record.longitude || latLongFallback.longitude || "";
+
   return {
     parkCode: record.parkCode || "",
     name: record.fullName || record.name || "Unknown park",
@@ -52,8 +71,8 @@ function normalizePark(record = {}) {
     directionsUrl: record.directionsUrl || "",
     weatherInfo: record.weatherInfo || "",
     url: record.url || "",
-    latitude: record.latitude || "",
-    longitude: record.longitude || "",
+    latitude,
+    longitude,
     activities,
     images,
   };
