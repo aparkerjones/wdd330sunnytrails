@@ -32,6 +32,11 @@ async function requestJson(params) {
   return response.json();
 }
 
+function toFiniteNumber(value) {
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 function normalizeWeather(data = {}) {
   const current = data.current_weather || {};
   const daily = data.daily || {};
@@ -69,12 +74,31 @@ export function getWeatherServiceConfig() {
 }
 
 export async function getWeatherForecast({ latitude, longitude } = {}) {
-  const data = await requestJson({
-    latitude: latitude ?? apiConfig.defaultLat,
-    longitude: longitude ?? apiConfig.defaultLon,
-  });
+  const safeLatitude = toFiniteNumber(latitude) ?? apiConfig.defaultLat;
+  const safeLongitude = toFiniteNumber(longitude) ?? apiConfig.defaultLon;
 
-  return normalizeWeather(data);
+  try {
+    const data = await requestJson({
+      latitude: safeLatitude,
+      longitude: safeLongitude,
+    });
+
+    return normalizeWeather(data);
+  } catch (error) {
+    const usingDefaultCoords =
+      safeLatitude === apiConfig.defaultLat && safeLongitude === apiConfig.defaultLon;
+
+    if (usingDefaultCoords) {
+      throw error;
+    }
+
+    const fallbackData = await requestJson({
+      latitude: apiConfig.defaultLat,
+      longitude: apiConfig.defaultLon,
+    });
+
+    return normalizeWeather(fallbackData);
+  }
 }
 
 export { normalizeWeather };

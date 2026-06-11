@@ -246,13 +246,21 @@ export function registerEventHandlers() {
 
     try {
       const park = await getParkByCode(parkCode);
-      const [weather, alerts] = await Promise.all([
+
+      if (!park || !park.parkCode) {
+        throw new Error("No park details were returned for that selection.");
+      }
+
+      const [weatherResult, alertsResult] = await Promise.allSettled([
         getWeatherForecast({
-          latitude: Number(park.latitude),
-          longitude: Number(park.longitude),
+          latitude: park.latitude,
+          longitude: park.longitude,
         }),
         getParkAlerts(parkCode),
       ]);
+
+      const weather = weatherResult.status === "fulfilled" ? weatherResult.value : null;
+      const alerts = alertsResult.status === "fulfilled" ? alertsResult.value : [];
 
       detailsNode.innerHTML = renderParkDetails(park, weather, alerts);
     } catch (error) {
