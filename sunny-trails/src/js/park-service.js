@@ -1,4 +1,4 @@
-import { apiConfig } from "../config/apiConfig.js";
+import { apiConfig } from "../config/api-config.js";
 
 function buildUrl(path, params = {}) {
   const url = new URL(`${apiConfig.npsBaseUrl}${path}`);

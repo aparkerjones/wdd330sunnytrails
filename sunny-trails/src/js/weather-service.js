@@ -1,4 +1,4 @@
-import { apiConfig } from "../config/apiConfig.js";
+import { apiConfig } from "../config/api-config.js";
 
 function buildWeatherUrl(params = {}) {
   const url = new URL(`${apiConfig.meteoBaseUrl}/forecast`);

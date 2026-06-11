@@ -2,7 +2,7 @@ import { escapeHtml } from "./utilities.js";
 
 export function renderItineraryList(items = []) {
   if (!items.length) {
-    return "<p>No saved trips yet. Search for a park and save one!</p>";
+    return "<p>You have no saved trips yet. Find a park and save your first one.</p>";
   }
 
   const rows = items

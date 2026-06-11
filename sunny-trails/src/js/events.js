@@ -1,9 +1,121 @@
-import { getParkAlerts, getParkByCode, searchParks } from "./parkService.js";
-import { getWeatherForecast } from "./weatherService.js";
+import { getParkAlerts, getParkByCode, searchParks } from "./park-service.js";
+import { getWeatherForecast } from "./weather-service.js";
 import { renderParkDetails, renderParkResults } from "./ui.js";
 import { getAllTrips, saveTrip, deleteTrip } from "./storage.js";
-import { renderItineraryForm } from "./itineraryForm.js";
-import { renderItineraryList } from "./itineraryList.js";
+import { renderItineraryForm } from "./itinerary-form.js";
+import { renderItineraryList } from "./itinerary-list.js";
+
+const STATE_NAME_TO_CODE = {
+  alabama: "AL",
+  alaska: "AK",
+  arizona: "AZ",
+  arkansas: "AR",
+  california: "CA",
+  colorado: "CO",
+  connecticut: "CT",
+  delaware: "DE",
+  florida: "FL",
+  georgia: "GA",
+  hawaii: "HI",
+  idaho: "ID",
+  illinois: "IL",
+  indiana: "IN",
+  iowa: "IA",
+  kansas: "KS",
+  kentucky: "KY",
+  louisiana: "LA",
+  maine: "ME",
+  maryland: "MD",
+  massachusetts: "MA",
+  michigan: "MI",
+  minnesota: "MN",
+  mississippi: "MS",
+  missouri: "MO",
+  montana: "MT",
+  nebraska: "NE",
+  nevada: "NV",
+  "new hampshire": "NH",
+  "new jersey": "NJ",
+  "new mexico": "NM",
+  "new york": "NY",
+  "north carolina": "NC",
+  "north dakota": "ND",
+  ohio: "OH",
+  oklahoma: "OK",
+  oregon: "OR",
+  pennsylvania: "PA",
+  "rhode island": "RI",
+  "south carolina": "SC",
+  "south dakota": "SD",
+  tennessee: "TN",
+  texas: "TX",
+  utah: "UT",
+  vermont: "VT",
+  virginia: "VA",
+  washington: "WA",
+  "west virginia": "WV",
+  wisconsin: "WI",
+  wyoming: "WY",
+  "district of columbia": "DC",
+  "washington dc": "DC",
+  "d c": "DC",
+  "puerto rico": "PR",
+  guam: "GU",
+  "american samoa": "AS",
+  "northern mariana islands": "MP",
+  "virgin islands": "VI",
+  "us virgin islands": "VI",
+};
+
+function normalizeStateToken(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return { code: "", valid: true };
+
+  if (/^[a-z]{2}$/i.test(raw)) {
+    return { code: raw.toUpperCase(), valid: true };
+  }
+
+  const normalizedName = raw
+    .toLowerCase()
+    .replace(/[.,]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const mappedCode = STATE_NAME_TO_CODE[normalizedName];
+  if (mappedCode) {
+    return { code: mappedCode, valid: true };
+  }
+
+  return { code: "", valid: false };
+}
+
+function normalizeStateInput(inputValue) {
+  const tokens = String(inputValue || "")
+    .split(",")
+    .map((token) => token.trim())
+    .filter(Boolean);
+
+  if (!tokens.length) {
+    return { stateCode: "", invalid: [] };
+  }
+
+  const codes = [];
+  const invalid = [];
+
+  tokens.forEach((token) => {
+    const normalized = normalizeStateToken(token);
+    if (normalized.valid && normalized.code) {
+      codes.push(normalized.code);
+    } else if (!normalized.valid) {
+      invalid.push(token);
+    }
+  });
+
+  return {
+    stateCode: [...new Set(codes)].join(","),
+    invalid,
+  };
+}
 
 function refreshItineraryDisplay() {
   const itineraryNode = document.getElementById("itinerary");
@@ -36,7 +148,7 @@ function attachFormHandlers() {
     const tripName = String(formData.get("tripName") || "").trim();
 
     if (!tripName) {
-      alert("Please enter a trip name.");
+      alert("Please add a name for your trip.");
       return;
     }
 
@@ -50,7 +162,7 @@ function attachFormHandlers() {
     };
 
     saveTrip(trip);
-    alert(`Trip "${trip.name}" saved!`);
+    alert(`Saved "${trip.name}".`);
     refreshItineraryDisplay();
   });
 
@@ -86,7 +198,7 @@ function attachListHandlers() {
   deleteButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
       const tripId = btn.dataset.tripId;
-      if (confirm("Are you sure you want to delete this trip?")) {
+      if (confirm("Delete this trip from your saved itinerary?")) {
         deleteTrip(tripId);
         refreshItineraryDisplay();
       }
@@ -134,7 +246,15 @@ export function registerEventHandlers() {
 
     const formData = new FormData(searchForm);
     const query = String(formData.get("query") || "").trim();
-    const stateCode = String(formData.get("stateCode") || "").trim().toUpperCase();
+    const rawStateInput = String(formData.get("stateCode") || "").trim();
+    const { stateCode, invalid } = normalizeStateInput(rawStateInput);
+
+    if (invalid.length) {
+      const badValues = invalid.join(", ");
+      searchStatus.textContent = `I could not match these states: ${badValues}. Try a two-letter code (WY) or full name (Wyoming).`;
+      resultsNode.innerHTML = "";
+      return;
+    }
 
     searchStatus.textContent = "Searching parks...";
     resultsNode.innerHTML = "";
@@ -152,7 +272,7 @@ export function registerEventHandlers() {
 
       searchStatus.textContent = parks.length
         ? `Found ${parks.length} park${parks.length === 1 ? "" : "s"}.`
-        : "No parks matched that search.";
+        : "No parks matched that search. Try another park name or state.";
     } catch (error) {
       searchStatus.textContent = `Search failed: ${error.message}`;
       resultsNode.innerHTML = "";

@@ -7,7 +7,7 @@ This folder holds the Week 5 deliverables for the Sunny Trails final project.
 - Scope finalized: see `project-scope.md`
 - Wireframes drafted: see `wireframes.md`
 - Project structure created: see `src/`
-- API environment configured: see `.env.example` and `src/config/apiConfig.js`
+- API environment configured: see `.env.example` and `src/config/api-config.js`
 - Trello workflow documented: see `trello-workflow.md`
 - Visual identity defined: see `src/styles/tokens.css`
 
@@ -20,13 +20,13 @@ This folder holds the Week 5 deliverables for the Sunny Trails final project.
 
 ## Project Modules
 
-- `src/js/parkService.js`
-- `src/js/weatherService.js`
+- `src/js/park-service.js`
+- `src/js/weather-service.js`
 - `src/js/storage.js`
 - `src/js/ui.js`
 - `src/js/events.js`
 - `src/js/utilities.js`
-- `src/js/parkCard.js`
-- `src/js/parkDetail.js`
-- `src/js/itineraryForm.js`
-- `src/js/itineraryList.js`
+- `src/js/park-card.js`
+- `src/js/park-detail.js`
+- `src/js/itinerary-form.js`
+- `src/js/itinerary-list.js`
