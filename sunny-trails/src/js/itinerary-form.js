@@ -7,6 +7,10 @@ export function renderItineraryForm(trip = null) {
   const startDate = escapeHtml(trip?.startDate || "");
   const endDate = escapeHtml(trip?.endDate || "");
   const notes = escapeHtml(trip?.notes || "");
+  const gearChecklist = Array.isArray(trip?.gearChecklist)
+    ? trip.gearChecklist.join("\n")
+    : String(trip?.gearChecklist || "");
+  const safeGearChecklist = escapeHtml(gearChecklist);
 
   return `
     <form id="itinerary-form" class="itinerary-form">
@@ -38,6 +42,14 @@ export function renderItineraryForm(trip = null) {
         <label>
           <span>Trip notes</span>
           <textarea name="notes" placeholder="What to bring, activities planned, etc.">${notes}</textarea>
+        </label>
+
+        <label>
+          <span>Gear checklist</span>
+          <textarea
+            name="gearChecklist"
+            placeholder="One item per line, e.g.\nTent\nWater filter\nFirst aid kit"
+          >${safeGearChecklist}</textarea>
         </label>
       </fieldset>
 

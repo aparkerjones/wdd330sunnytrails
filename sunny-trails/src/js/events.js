@@ -174,6 +174,27 @@ function refreshItineraryDisplay() {
   }
 }
 
+function parseChecklistItems(rawValue = "") {
+  return String(rawValue)
+    .split(/\r?\n|,/) 
+    .map((value) => value.trim())
+    .filter(Boolean);
+}
+
+function buildTripSummaryMessage(trip) {
+  const dateRange = [trip.startDate, trip.endDate].filter(Boolean).join(" to ");
+  const checklistPreview = (trip.gearChecklist || []).slice(0, 5).join(", ");
+
+  return [
+    "Save this itinerary?",
+    `Trip: ${trip.name}`,
+    `Park: ${trip.parkCode || "Not set"}`,
+    `Dates: ${dateRange || "Not set"}`,
+    `Notes: ${trip.notes || "None"}`,
+    `Gear: ${checklistPreview || "None"}`,
+  ].join("\n");
+}
+
 function attachFormHandlers() {
   const form = document.getElementById("itinerary-form");
   if (!form) return;
@@ -197,7 +218,12 @@ function attachFormHandlers() {
       startDate: String(formData.get("startDate") || "").trim(),
       endDate: String(formData.get("endDate") || "").trim(),
       notes: String(formData.get("notes") || "").trim(),
+      gearChecklist: parseChecklistItems(formData.get("gearChecklist") || ""),
     };
+
+    if (!confirm(buildTripSummaryMessage(trip))) {
+      return;
+    }
 
     saveTrip(trip);
     alert(`Saved "${trip.name}".`);

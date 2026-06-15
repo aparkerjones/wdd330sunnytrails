@@ -13,6 +13,19 @@ export function renderItineraryList(items = []) {
       const endDate = escapeHtml(item.endDate || "");
       const parkCode = escapeHtml(item.parkCode || "");
       const notes = escapeHtml(item.notes || "");
+      const checklistItems = Array.isArray(item.gearChecklist)
+        ? item.gearChecklist.map((entry) => escapeHtml(entry || "")).filter(Boolean)
+        : [];
+      const checklistMarkup = checklistItems.length
+        ? `
+          <div class="trip-gear">
+            <strong>Gear checklist:</strong>
+            <ul>
+              ${checklistItems.map((entry) => `<li>${entry}</li>`).join("")}
+            </ul>
+          </div>
+        `
+        : "";
 
       return `
     <li class="trip-item" data-trip-id="${id}">
@@ -24,6 +37,7 @@ export function renderItineraryList(items = []) {
         </p>
         ${parkCode ? `<p><strong>Park:</strong> ${parkCode}</p>` : ""}
         ${notes ? `<p>${notes}</p>` : ""}
+        ${checklistMarkup}
       </div>
       <div class="trip-actions">
         <button type="button" class="edit-trip" data-trip-id="${id}">Edit</button>
