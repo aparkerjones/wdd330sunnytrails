@@ -25,8 +25,8 @@ export function renderItineraryForm(trip = null) {
         </label>
         
         <label>
-          <span>Park code</span>
-          <input name="parkCode" type="text" value="${parkCode}" placeholder="e.g., yell" />
+          <span>Park Name</span>
+          <input name="parkName" type="text" value="${parkName}" placeholder="e.g., Yellowstone National Park" />
         </label>
         
         <label>
