@@ -3,7 +3,7 @@ import { escapeHtml } from "./utilities.js";
 export function renderItineraryForm(trip = null) {
   const id = escapeHtml(trip?.id || "");
   const name = escapeHtml(trip?.name || "");
-  const parkCode = escapeHtml(trip?.parkCode || "");
+  const parkName = escapeHtml(trip?.parkName || "");
   const startDate = escapeHtml(trip?.startDate || "");
   const endDate = escapeHtml(trip?.endDate || "");
   const notes = escapeHtml(trip?.notes || "");

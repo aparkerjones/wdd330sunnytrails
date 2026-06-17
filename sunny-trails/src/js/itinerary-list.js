@@ -11,7 +11,7 @@ export function renderItineraryList(items = []) {
       const name = escapeHtml(item.name || "Untitled trip");
       const startDate = escapeHtml(item.startDate || "");
       const endDate = escapeHtml(item.endDate || "");
-      const parkCode = escapeHtml(item.parkCode || "");
+      const parkName = escapeHtml(item.parkName || "");
       const notes = escapeHtml(item.notes || "");
       const checklistItems = Array.isArray(item.gearChecklist)
         ? item.gearChecklist.map((entry) => escapeHtml(entry || "")).filter(Boolean)
@@ -35,7 +35,7 @@ export function renderItineraryList(items = []) {
           ${startDate ? `<strong>Start:</strong> ${startDate}` : ""}
           ${endDate ? ` | <strong>End:</strong> ${endDate}` : ""}
         </p>
-        ${parkCode ? `<p><strong>Park:</strong> ${parkCode}</p>` : ""}
+        ${parkName ? `<p><strong>Park:</strong> ${parkName}</p>` : ""}
         ${notes ? `<p>${notes}</p>` : ""}
         ${checklistMarkup}
       </div>

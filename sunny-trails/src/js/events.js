@@ -188,7 +188,8 @@ function buildTripSummaryMessage(trip) {
   return [
     "Save this itinerary?",
     `Trip: ${trip.name}`,
-    `Park: ${trip.parkCode || "Not set"}`,
+    `Park: ${trip.parkName || "Not set"}`,
+
     `Dates: ${dateRange || "Not set"}`,
     `Notes: ${trip.notes || "None"}`,
     `Gear: ${checklistPreview || "None"}`,
@@ -214,7 +215,7 @@ function attachFormHandlers() {
     const trip = {
       id: tripId,
       name: tripName,
-      parkCode: String(formData.get("parkCode") || "").trim(),
+      parkName: String(formData.get("parkName") || "").trim(),
       startDate: String(formData.get("startDate") || "").trim(),
       endDate: String(formData.get("endDate") || "").trim(),
       notes: String(formData.get("notes") || "").trim(),
